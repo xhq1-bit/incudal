@@ -3407,6 +3407,19 @@ const api = {
       }
     }> => http.post(`/recharge/orders/${orderNo}/verify`),
 
+    // 兑换充值卡密
+    redeemRechargeCard: (cardNo: string, password: string): Promise<{
+      success: boolean
+      message: string
+      orderNo: string
+      amount: number
+      balance: number
+      card: {
+        cardNo: string
+        amount: number
+      }
+    }> => http.post('/recharge/cards/redeem', { cardNo, password }),
+
     // 获取套餐方案列表
     getPackagePlans: (packageId: number): Promise<{
       plans: Array<{
@@ -3495,6 +3508,71 @@ const api = {
     deletePaymentProvider: (id: number): Promise<{
       message: string
     }> => http.delete(`/admin/payment-providers/${id}`),
+
+    // ==================== 充值卡密管理 ====================
+
+    getRechargeCards: (params?: {
+      page?: number
+      pageSize?: number
+      status?: string
+      search?: string
+      batchNo?: string
+      createdById?: number | ''
+      usedById?: number | ''
+      minAmount?: number | ''
+      maxAmount?: number | ''
+      createdFrom?: string
+      createdTo?: string
+      usedFrom?: string
+      usedTo?: string
+      sortBy?: string
+      sortOrder?: string
+    }): Promise<{
+      cards: Array<{
+        id: number
+        cardNo: string
+        passwordMask: string
+        amount: number
+        batchNo: string
+        status: 'unused' | 'used'
+        createdBy: { id: number; username: string } | null
+        createdAt: string
+        usedBy: { id: number; username: string } | null
+        usedAt: string | null
+        rechargeRecordId: number | null
+      }>
+      total: number
+      page: number
+      pageSize: number
+    }> => http.get('/admin/recharge-cards', { params }),
+
+    createRechargeCards: (data: { amount: number; count: number }): Promise<{
+      success: boolean
+      message: string
+      batchNo: string
+      cards: Array<{
+        cardNo: string
+        password: string
+        amount: number
+      }>
+    }> => http.post('/admin/recharge-cards', data, { timeout: TIMEOUT.MEDIUM }),
+
+    deleteRechargeCard: (id: number): Promise<{
+      success: boolean
+      message: string
+    }> => http.delete(`/admin/recharge-cards/${id}`),
+
+    deleteRechargeCards: (ids: number[]): Promise<{
+      success: boolean
+      message: string
+      deleted: number
+      skippedUsed: number
+      notFound: number
+      deletedIds: number[]
+    }> => http.post('/admin/recharge-cards/delete', { ids }, { timeout: TIMEOUT.MEDIUM }),
+
+    exportRechargeCards: (ids: number[]): Promise<string> =>
+      http.post('/admin/recharge-cards/export', { ids }, { responseType: 'text', timeout: TIMEOUT.MEDIUM }),
 
     // ==================== 统计 ====================
 
