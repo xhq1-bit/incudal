@@ -2986,3 +2986,20 @@ model HostingZone {
   @@index([active, sortOrder])
   @@map("hosting_zones")
 }
+
+// 导出任务表（替代内存 Map 存储）
+model ExportTask {
+  id              String   @id // UUID
+  instanceId      Int      @map("instance_id")
+  backupId        Int      @map("backup_id")
+  incusBackupName String   @map("incus_backup_name")
+  userId          Int      @map("user_id")
+  status          String   @default("creating") // creating | ready | downloading | completed | error
+  error           String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  expiresAt       DateTime @map("expires_at")
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("export_tasks")
+}
